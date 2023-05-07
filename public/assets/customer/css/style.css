@@ -1,0 +1,144 @@
+.free-room-image>img {
+    max-height: 250px !important;
+    min-height: 250px;
+    object-fit: cover;
+}
+
+.btn-auth {
+    outline: none;
+    background: none;
+    color: #ffffff !important;
+}
+
+.customer-info {
+    width: 800px;
+    margin: auto;
+    padding: 50px;
+}
+
+.customer-info h3 {
+    text-align: center;
+}
+
+.customer-info-footer {
+    text-align: center;
+}
+
+.customer-info-footer a {
+    margin-left: 15px;
+}
+
+.contract-customer {
+    width: 60%;
+    margin: auto;
+    padding: 50px;
+    min-height: 600px;
+}
+
+.contract-customer h3 {
+    text-align: center;
+}
+
+.bill-content {
+    width: 70%;
+    margin: auto;
+    padding: 50px;
+    height: 800px;
+    min-height: 600px;
+}
+
+.detail-bill-content {
+    width: 70%;
+    margin: auto;
+    padding: 50px;
+}
+
+.detail-bill-content h3 {
+    text-align: center;
+}
+
+.change-password {
+    width: 60%;
+    padding: 50px;
+    margin: auto;
+    min-height: 600px;
+}
+
+.change-password h3 {
+    text-align: center;
+}
+
+.error {
+    color: red;
+}
+
+.customer-rooms {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.customer-rooms-right {
+    width: 70%;
+}
+
+.customer-rooms-wrap {
+    display: flex;
+    width: 90%;
+    margin: auto;
+    padding: 50px;
+}
+
+.item-rooms {
+    width: 46%;
+    padding: 20px;
+    margin: 10px;
+}
+
+.list-room-image img {
+    min-width: 100%;
+    max-width: 100%;
+    min-height: 250px;
+    max-height: 250px;
+    object-fit: cover;
+}
+
+.customer-contract {
+    width: 50%;
+    margin: auto;
+    padding: 50px;
+}
+
+.search-rooms {
+    width: 30%;
+    padding: 100px 20px;
+}
+
+.book-room-images {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.book-room-images img {
+    min-width: 47%;
+    max-width: 47%;
+    min-height: 250px;
+    max-height: 250px;
+    object-fit: cover;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #000c17;
+}
+
+.book-customer {
+    display: flex;
+}
+
+.room-info {
+    margin-left: 20px;
+}
+
+.transplant-wrap {
+    width: 50%;
+    margin: auto;
+    padding: 15px;
+}

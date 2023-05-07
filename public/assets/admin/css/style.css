@@ -1,0 +1,67 @@
+#preview img {
+    margin: 5px 15px;
+    border: 1px solid #6e99aa;
+    padding: 5px;
+}
+
+#room-update-preview {
+    display: flex;
+}
+
+.room-update-image {
+    position: relative;
+    margin: 5px 15px;
+    padding: 5px;
+    border: 1px solid #6e99aa;
+}
+
+.room-update-image img {
+    max-width: 120px;
+    max-height: 120px;
+    object-fit: cover;
+}
+
+.delete-image {
+    position: absolute;
+    color: red;
+    font-size: 25px;
+    display: compact;
+    top: -8px;
+    right: 6px;
+}
+
+.delete-image:hover {
+    cursor: pointer;
+}
+
+.show-new-image {
+    display: none;
+}
+
+.new-room-images img {
+    object-fit: cover;
+    max-width: 120px;
+    max-height: 120px;
+    padding: 5px;
+    margin: 5px 15px;
+    border: 1px solid #6e99aa;
+
+}
+
+.room-id-wrapper {
+    width: 50%;
+    border: 1px solid #6e99aa !important;
+}
+
+.room-id-wrapper select {
+    width: 100%;
+}
+
+.customer-id-wrapper {
+    width: 50%;
+    border: 1px solid #6e99aa !important;
+}
+
+.customer-id-wrapper select {
+    width: 100%;
+}
