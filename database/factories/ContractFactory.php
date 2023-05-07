@@ -30,7 +30,8 @@ class ContractFactory extends Factory
             'description' => Str::random(32),
             'start_date' => Carbon::now()->subDays(rand(60, 300)),
             'end_date' => Carbon::now()->addDays(rand(0, 150)),
-            'status' => rand(0,1)
+            'status' => rand(0,1),
+            'return_room' => rand(0,1),
         ];
     }
 }

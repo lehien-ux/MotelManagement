@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddColumnReturnRoomTable extends Migration
+class AddReturnRoomToContractsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class AddColumnReturnRoomTable extends Migration
      */
     public function up()
     {
-       Schema::table('contracts', function (Blueprint $table) {
-           $table->tinyInteger('return_room')->default(0);
-       });
+        Schema::table('contracts', function (Blueprint $table) {
+            $table->tinyInteger('return_room')->default(0);
+        });
     }
 
     /**
@@ -25,6 +25,8 @@ class AddColumnReturnRoomTable extends Migration
      */
     public function down()
     {
-        //
+        Schema::table('contracts', function (Blueprint $table) {
+            //
+        });
     }
 }
