@@ -12,8 +12,8 @@
                 <td>{{ number_format($bill->total_price) }} vnđ</td>
             </tr>
             <tr>
-                <td>Tháng</td>
-                <td>{{ \Carbon\Carbon::parse($bill->month)->format('m-Y') }}</td>
+                <td>Thời gian sử dụng</td>
+                <td>{{ \Carbon\Carbon::parse($bill->start_date)->format('d/m/Y') }} - {{ \Carbon\Carbon::parse($bill->end_date)->format('d/m/Y') }}</td>
             </tr>
             <tr>
                 <td>Trạng thái</td>
@@ -29,6 +29,20 @@
             </tr>
         </table>
         <h3>Danh sách dịch vụ</h3>
+        <?php
+            use Carbon\Carbon;
+            $total = 0;
+            $date1 = Carbon::parse($bill->start_date);
+            $date2 = Carbon::parse($bill->end_date);
+            $startMonthDays = (int) $date1->format('t');
+            $endMonthDays = (int) $date2->format('t');
+            $daysInStartMonth = $startMonthDays - $date1->format('j') + 1;
+            $daysInEndMonth = $date2->format('j');
+            $fullMonths = ($date2->format('Y') - $date1->format('Y')) * 12 + ($date2->format('n') - $date1->format('n') - 1);
+            $partialStartMonth = $daysInStartMonth / $startMonthDays;
+            $partialEndMonth = $daysInEndMonth / $endMonthDays;   
+            $monthsSpanned = $fullMonths + $partialStartMonth + $partialEndMonth;
+        ?>
         <table class="table">
             <tr class="service-usage-header">
                 <td>Tên dịch vụ</td>
@@ -36,31 +50,49 @@
                 <td>Số lượng sử dụng</td>
                 <td>Thành tiền</td>
             </tr>
-            <?php $total = $bill->room->price; ?>
             @foreach($bill->detailBills as $detailBill)
                 <tr>
                     <td>{{ $detailBill->service->name }}</td>
                     <td>{{ number_format($detailBill->service->price) }} ({{ $detailBill->service->unit_price }})</td>
                     <td>
                         {{
-                            $detailBill->usage == 1 ? $detailBill->usage . ' tháng' : $detailBill->usage . ' ' . $detailBill->service->unit_price
+                            $detailBill->service->service_type == 2 
+                            ? ''
+                            : $detailBill->usage . ' (' . $detailBill->service->unit_price . ')'
                         }}
                     </td>
-                    <td>{{ number_format($detailBill->usage * $detailBill->service->price) }}</td>
-                    <?php $total += $detailBill->usage * $detailBill->service->price ?>
+                    <td>
+                    {{ 
+                        $detailBill->service->service_type == 2
+                        ? number_format(round($monthsSpanned * $detailBill->service->price, 2))
+                        : number_format($detailBill->usage * $detailBill->service->price) 
+                    }}
+                    </td>  
+                    <?php 
+                    $total += $detailBill->service->service_type == 2
+                    ? $monthsSpanned * $detailBill->service->price
+                    : $detailBill->usage * $detailBill->service->price;
+                    ?> 
                 </tr>
             @endforeach
             <tr>
                 <td>Tiền phòng</td>
                 <td>{{ number_format($bill->room->price) }} vnđ</td>
-                <td>1 tháng</td>
-                <td>{{ number_format($bill->room->price) }}</td>
+                <td></td>
+                <td>{{ number_format(round($bill->room->price * $monthsSpanned, 2)) }}</td>
+
+                <?php 
+                $total += $bill->room->price * $monthsSpanned;
+                ?>
+            
             </tr>
             <tr>
                 <td></td>
                 <td></td>
-                <td>Tồng tiền</td>
-                <td>{{ number_format($total) }}</td>
+                <td><b>Tồng tiền đã làm tròn</b><br>
+                <i>Gốc: {{ number_format($total) }}</i>
+                </td>
+                <td><b>{{ number_format($bill->total_price) }}<b> </td>
             </tr>
         </table>
         @if(!$bill->status == \App\Enums\Constant::PAID)

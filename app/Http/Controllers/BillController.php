@@ -55,7 +55,7 @@ class BillController extends Controller
         ]);
     }
 
-    public function getRoom($id)  // id room
+    public function getRoom($id) // id room
     {
         $room = Room::findOrFail($id);
         $contract = Contract::with('customer')
@@ -77,17 +77,17 @@ class BillController extends Controller
             'start_date' => 'required',
             'end_date' => 'after:start_date'
         ], [
-            'end_date.after' => 'Chọn ngày sai'
-        ]);
+                'end_date.after' => 'Chọn ngày sai'
+            ]);
         DB::beginTransaction();
         try {
             $total = 0;
             $startDate = Carbon::parse($request->start_date);
             $endDate = Carbon::parse($request->end_date);
+            $monthsSpanned = $this->diffInMonths($startDate, $endDate);
 
-            $totalDayInMonth = Carbon::parse($startDate)->daysInMonth;
-            $totalUseDay = $startDate->diffInDays($endDate, false) + 1;
-            $percentUsageDay = $totalUseDay / $totalDayInMonth;
+            $logMessage = 'HIENLOG: startDate: ' . $startDate . ', endDate: ' . $endDate . ', monthsSpanned: ' . $monthsSpanned;
+            info($logMessage);
 
             $services = Service::all();
             foreach ($request->all() as $key => $service) {
@@ -95,45 +95,24 @@ class BillController extends Controller
                     foreach ($services as $item) {
                         if ($item->id == $key) {
                             if ($item->service_type == 2) {
-                                $total += $item->price * $percentUsageDay;
+                                $total += $item->price * $monthsSpanned;
+                                info('HIENLOG: Service ' . $item->service_type . ', price ' . $item->price . ', monthsSpanned ' . $monthsSpanned . 'Total service cost ' . $total);
                             } else {
                                 $total += $item->price * $request[$key];
+                                info('HIENLOG: Service ' . $item->service_type . ', price ' . $item->price . ', requestKey ' . $request[$key] . 'Total service cost ' . $total);
                             }
                         }
                     }
                 }
             }
 
-            $contract = Contract::where('room_id', $request->room_id)
-                ->where('customer_id', $request->customer_id)
-                ->where('status', Constant::CONTRACT_ACTIVE)
-                ->first();
-            $firstBill = Bill::where('room_id', $request->room_id)
-                ->where('customer_id', $request->customer_id)
-                ->first();
-            $checkYear = strtotime($contract->end_date) - strtotime($contract->start_date);
             $message = 'Tạo hóa đơn thành công';
 
-            if (!$firstBill) {
-                if ($checkYear >= Constant::TWO_YEARS && $totalUseDay == $percentUsageDay) {
-                    $total = ceil($total + ($request->room_price * $percentUsageDay / 2));
-                    $message .= ' (Phòng này được giảm giá 50% tháng đầu tiên)';
-                } else {
-                    $total = ceil($total + $request->room_price * $percentUsageDay);
-                }
-            } else {
-                $dayInPreviousMonth = Carbon::parse($firstBill->start_date)->daysInMonth;
-                $endDay = Carbon::parse($firstBill->end_date)->format('d');
-                $startDay = Carbon::parse($firstBill->start_date)->format('d');
-                if ($endDay - $startDay >= $dayInPreviousMonth) {
-                    $total = ceil($total + $request->room_price * $percentUsageDay);
-                } else {
-                    $total = ceil($total + ($request->room_price * $percentUsageDay / 2));
-                    $message .= ' (Phòng này được giảm giá 50% tháng đầu tiên)';
-                }
-            }
+            $total = ceil($total + $request->room_price * $monthsSpanned);
 
             $total = $total - $total % 1000;
+            info('HIENLOG: total ' . $total);
+            info('HIENLOG: deposited' . $request->deposited . $request->deposited == $total);
 
             $status = 0;
             $paymentAt = null;
@@ -162,7 +141,7 @@ class BillController extends Controller
                             $detailBill[] = [
                                 'bill_id' => $bill->id,
                                 'service_id' => $item->id,
-                                'usage' => is_numeric($service) ? $service : 1,
+                                'usage' => $item->service_type == 2 ? round($monthsSpanned, 5) : $request[$key],
                                 'unit_price' => $item->price
                             ];
                         }
@@ -205,10 +184,8 @@ class BillController extends Controller
         $total = 0;
         $startDate = Carbon::parse($request->start_date);
         $endDate = Carbon::parse($request->end_date);
+        $monthsSpanned = $this->diffInMonths($startDate, $endDate);
 
-        $totalDayInMonth = Carbon::parse($startDate)->daysInMonth;
-        $totalUseDay = $startDate->diffInDays($endDate, false) + 1;
-        $percentUsageDay = $totalUseDay / $totalDayInMonth;
 
         $services = Service::all();
         foreach ($request->all() as $key => $service) {
@@ -216,7 +193,7 @@ class BillController extends Controller
                 foreach ($services as $item) {
                     if ($item->id == $key) {
                         if ($item->service_type == 2) {
-                            $total += $item->price * $percentUsageDay;
+                            $total += $item->price * $monthsSpanned;
                         } else {
                             $total += $item->price * $request[$key];
                         }
@@ -225,19 +202,8 @@ class BillController extends Controller
             }
         }
 
-        $contract = Contract::where('room_id', $request->room_id)
-            ->where('customer_id', $request->customer_id)
-            ->where('status', Constant::CONTRACT_ACTIVE)
-            ->first();
-        $firstBill = Bill::where('room_id', $request->room_id)
-            ->where('customer_id', $request->customer_id)
-            ->count();
-        $checkYear = strtotime($contract->end_date) - strtotime($contract->start_date);
-        if ($checkYear > Constant::TWO_YEARS && $firstBill == 1) {
-            $total = ceil($total + ($request->room_price * $percentUsageDay / 2));
-        } else {
-            $total = ceil($total + $request->room_price * $percentUsageDay);
-        }
+        $total = ceil($total + $request->room_price * $monthsSpanned);
+
 
         $total = $total - $total % 1000;
 
@@ -269,10 +235,11 @@ class BillController extends Controller
                 if (is_numeric($key)) {
                     foreach ($services as $item) {
                         if ($item->id == $key) {
+                        info('HIENLOG: service_id ' . $item->id . ',service ' . $service);
                             $detailBill[] = [
                                 'bill_id' => $id,
                                 'service_id' => $item->id,
-                                'usage' => is_numeric($service) ? $service : 1,
+                                'usage' => $item->service_type == 2 ? round($monthsSpanned, 5) : $request[$key],
                                 'unit_price' => $item->price
                             ];
                         }
@@ -306,10 +273,7 @@ class BillController extends Controller
         $total = 0;
         $startDate = Carbon::parse($request->start_date);
         $endDate = Carbon::parse($request->end_date);
-
-        $totalDayInMonth = Carbon::parse($startDate)->daysInMonth;
-        $totalUseDay = $startDate->diffInDays($endDate, false) + 1;
-        $percentUsageDay = $totalUseDay / $totalDayInMonth;
+        $monthsSpanned = $this->diffInMonths($startDate, $endDate);
 
         $services = Service::all();
         foreach ($request->all() as $key => $service) {
@@ -317,7 +281,7 @@ class BillController extends Controller
                 foreach ($services as $item) {
                     if ($item->id == $key) {
                         if ($item->service_type == 2) {
-                            $total += $item->price * $percentUsageDay;
+                            $total += $item->price * $monthsSpanned;
                         } else {
                             $total += $item->price * $request[$key];
                         }
@@ -326,7 +290,7 @@ class BillController extends Controller
             }
         }
 
-        $total = ceil($total + $request->room_price * $percentUsageDay);
+        $total = ceil($total + $request->room_price * $monthsSpanned);
 
         $total = $total - $total % 1000;
 
@@ -341,5 +305,22 @@ class BillController extends Controller
             ->first();
 
         return response($contract);
+    }
+
+    
+    public function diffInMonths(\DateTime $date1, \DateTime $date2)
+    {
+        $startMonthDays = (int) $date1->format('t');
+        $endMonthDays = (int) $date2->format('t');
+        $daysInStartMonth = $startMonthDays - $date1->format('j') + 1;
+        $daysInEndMonth = $date2->format('j');
+        $fullMonths = ($date2->format('Y') - $date1->format('Y')) * 12 + ($date2->format('n') - $date1->format('n') - 1);
+        $partialStartMonth = $daysInStartMonth / $startMonthDays;
+        $partialEndMonth = $daysInEndMonth / $endMonthDays;
+        info('HIENLOG: fullMonths ' . $fullMonths);
+        info('HIENLOG: partialStartMonth ' . $partialStartMonth);
+        info('HIENLOG: partialEndMonth ' . $partialEndMonth);
+    
+        return $fullMonths + $partialStartMonth + $partialEndMonth;
     }
 }
