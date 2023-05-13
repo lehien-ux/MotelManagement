@@ -19,7 +19,9 @@ class ContractExport implements FromView
     public function view(): View
     {
         return view('admin.contracts.export')->with([
-            'contract' => Contract::where('id', $this->id)->with('customer', 'room')->first()
+            'contract' => Contract::where('id', $this->id)->with('customer', 'room')->first(),
+            'services' => Contract::find($this->id)->services
         ]);
+        
     }
 }
