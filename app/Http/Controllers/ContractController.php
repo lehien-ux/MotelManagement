@@ -180,7 +180,7 @@ class ContractController extends Controller
             $contract->update($data);
 
             DB::commit();
-            return redirect()->route('contracts.list')->with('message', 'Thêm hợp đồng thành công');
+            return redirect()->route('contracts.list')->with('message', 'Cập nhật hợp đồng thành công');
         } catch (\Exception $exception) {
             DB::rollBack();
             abort(500);
@@ -204,7 +204,7 @@ class ContractController extends Controller
 
         $contract->save();
 
-        return redirect()->route('contracts.list')->with('message', 'Cập nhật hợp đông thành công');
+        return redirect()->route('contracts.list')->with('message', 'Cập nhật hợp đồng thành công');
     }
 
     public function returnList()

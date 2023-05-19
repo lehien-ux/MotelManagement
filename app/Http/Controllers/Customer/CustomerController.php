@@ -221,6 +221,10 @@ class CustomerController extends Controller
         $startDay = strtotime(Carbon::parse($request->start_date));
         $endDay = strtotime(Carbon::parse($request->end_date));
 
+        if ($endDay < $startDay) {
+            return back()->with('message', 'Hạn ngày hợp đồng phải lớn hơn ngày bắt đầu');
+        }
+
         if ($endDay - $startDay < Constant::MIN_DAY_OF_CONTRACT) {
             return back()->with('message', 'Hợp đồng không được nhỏ hơn 1 tháng');
         }
