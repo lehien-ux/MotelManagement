@@ -107,6 +107,7 @@
                                                         value=""
                                                         name="{{ $service->id }}"
                                                         disabled
+                                                        required
                                                     >
                                                     <br>
                                                 @endif

@@ -132,6 +132,7 @@
                                                         value="{{ isset($useService[$service->id]) ? $useService[$service->id]['usage'] : '' }}"
                                                         name="{{ $service->id }}"
                                                         data-price="{{ $service->price }}"
+                                                        required
                                                     >
                                                     <br>
                                                 @endif

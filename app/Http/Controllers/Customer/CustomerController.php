@@ -228,7 +228,9 @@ class CustomerController extends Controller
         if ($endDay - $startDay < Constant::MIN_DAY_OF_CONTRACT) {
             return back()->with('message', 'Hợp đồng không được nhỏ hơn 1 tháng');
         }
-
+        if ($endDay < now()-> timestamp) {
+            return back()->with('message', 'Ngày kết thúc hợp đồng phải lớn hơn ngày hiện tại');
+        }
         $request->validate([
             'start_date' => 'required',
             'end_date' => 'required|after:Carbon::start_date()->addDay(30)'

@@ -75,10 +75,12 @@ class BillController extends Controller
     {
         $request->validate([
             'start_date' => 'required',
-            'end_date' => 'after:start_date'
+            'end_date' => 'required|after:start_date'
         ], [
-                'end_date.after' => 'Chọn ngày sai'
-            ]);
+            'start_date.required' => 'Vui lòng nhập ngày bắt đầu',
+            'end_date.required' => 'Vui lòng nhập ngày kết thức',
+            'end_date.after' => 'Ngày kết thúc phải lớn hơn ngày bắt đầu'
+        ]);
         DB::beginTransaction();
         try {
             $total = 0;
@@ -181,6 +183,11 @@ class BillController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->validate([  
+            'end_date' => 'after:start_date'
+        ], [
+            'end_date.after' => 'Ngày kết thúc phải lớn hơn ngày bắt đầu'
+        ]);
         $total = 0;
         $startDate = Carbon::parse($request->start_date);
         $endDate = Carbon::parse($request->end_date);
