@@ -349,7 +349,7 @@ class CustomerController extends Controller
         $contract->return_room = 1;
         $contract->save();
 
-        return redirect()->route('home')->with('message', 'Gửi yêu của trả phòng thành công');
+        return redirect()->route('home')->with('message', 'Gửi yêu cầu trả phòng thành công');
     }
 
     public function transplant($id)
